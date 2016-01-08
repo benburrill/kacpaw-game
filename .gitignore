@@ -1,2 +1,3 @@
 *.shelf.*
 __pycache__
+venv
