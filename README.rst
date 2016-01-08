@@ -9,7 +9,7 @@ After cloning this repo (make sure to get the submodules), install virtualenv an
     virtualenv venv
 
 to create virtualenv in the folder venv
-Now activate the virtualenv.  See `the virtualenv documentation page<http://virtualenv.readthedocs.org/en/latest/userguide.html>`_ for details.  Now you can pip install kacpaw, which will be in the submodule folder like so::
+Now activate the virtualenv.  See `the virtualenv documentation page <http://virtualenv.readthedocs.org/en/latest/userguide.html>`_ for details.  Now you can pip install kacpaw, which will be in the submodule folder like so::
     pip install ./external/kacpaw
 
 You may also need to install some other dependencies, such as jinja2
