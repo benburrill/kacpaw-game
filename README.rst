@@ -4,7 +4,7 @@ Some Automated KA Game
 To test the front end, run ``view-front-end.py``
 
 To test the back end, you will want to use venv.
-After cloning this repo (make sure to get the submodules), install virtualenv and run
+After cloning this repo, install virtualenv and run
 ::
     virtualenv venv
 
