@@ -1,0 +1,32 @@
+{% extends "wrapper.html" %}
+
+{% set canvas_id = "output-canvas" %}
+
+{% block head %}
+    <title>{{ title }}</title>
+    
+    <style type="text/css">
+        #{{ canvas_id }} {
+            width: 100%;
+            height: 300px;
+        }
+    </style>
+    
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/processing.js/1.4.16/processing.min.js"></script>
+    <script type="text/javascript">
+        var world = {{ world_json }};
+    </script>
+{% endblock %}
+
+{% block header %}
+    <h1>{{ title }}</h1>
+{% endblock %}
+
+{% block pjs %}
+    {# I couldn't tell you why I need to do this, but I can tell you that it was "fun" to debug this with the default jinja2 option of having undefined variables fail silently. #}
+    {% set canvas_id = canvas_id %}
+
+    {% include "pjssetup.js" %}
+    {% include "pjsmain.js" %}
+{% endblock %}

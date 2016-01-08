@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+
+<!-- This program was automatically generated using a formatter (jinja2), so the indentation and line spacing will look really bad.  I will probably release the source at some point, which would make this much easier to follow. -->
+
+<html>
+    <head lang="en">
+        <meta charset="utf-8">
+        {% block head %}
+        {% endblock %}
+
+        <script type="text/processing" data-processing-target="{{ canvas_id }}">
+            {% block pjs %}
+            {% endblock %}
+        </script>
+
+        <!-- Empty script tag without a type to get a restart button.   For some reason, script tags with a type attribute, don't give you a restart button.  I like to be somewhat explicit about my tags, so I will probably always add type attributes to my script tags.  -->
+        <script></script>
+    </head>
+    <body>
+        <header>
+            {% block header %}
+            {% endblock %}
+        </header>
+
+        <canvas id="{{ canvas_id }}"></canvas>
+        
+        {% block body %}
+        {% endblock %}
+
+        <footer>
+            {% block footer %}
+            {% endblock %}
+        </footer>
+    </body>
+</html>
