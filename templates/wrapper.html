@@ -8,7 +8,7 @@
         {% block head %}
         {% endblock %}
 
-        <script type="text/processing" data-processing-target="{{ canvas_id }}">
+        <script type="text/processing" data-processing-target="output-canvas">
             {% block pjs %}
             {% endblock %}
         </script>
@@ -22,7 +22,7 @@
             {% endblock %}
         </header>
 
-        <canvas id="{{ canvas_id }}"></canvas>
+        <canvas id="output-canvas"></canvas>
         
         {% block body %}
         {% endblock %}

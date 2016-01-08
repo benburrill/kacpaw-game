@@ -2,7 +2,7 @@
 
 // sets the size to the canvas's size
 var on_resize = function() {
-    $canvas = $("#{{ canvas_id }}");
+    $canvas = $("#output-canvas");
     size($canvas.width(), $canvas.height());
 };
 
