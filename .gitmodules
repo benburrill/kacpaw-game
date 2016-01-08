@@ -1,0 +1,3 @@
+[submodule "external/kacpaw"]
+	path = external/kacpaw
+	url = https://github.com/Potato42/kacpaw.git

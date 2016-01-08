@@ -3,7 +3,22 @@ Some Automated KA Game
 
 To test the front end, run ``view-front-end.py``
 
-To test the back end, I'm not really sure yet.  Until now I've just been messing around with ``sys.path`` to get things to work, but it will probably involve virtualenv, pip, and possibly git submodules.
+To test the back end, you will want to use venv.
+After cloning this repo (make sure to get the submodules), install virtualenv and run 
+
+    virtualenv venv
+
+to create virtualenv in the folder venv
+Now activate the virtualenv.  See http://virtualenv.readthedocs.org/en/latest/userguide.html for details.  Now you can pip install kacpaw, which will be in the submodule folder like so:
+
+    pip install ./external/kacpaw
+
+You may also need to install some other dependencies, such as jinja2
+Now, you can run the program
+
+    python __init__.py
+
+
 
 Assuming I'm not the only person who will work on this game, communication will be done with issues.  Open an issue if you have a topic you want to discuss (or if there is an actual issue)
 
