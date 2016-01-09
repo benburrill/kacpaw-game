@@ -12,6 +12,8 @@
     
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/processing.js/1.4.16/processing.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+    
     <script type="text/javascript">
         var world = {{ world_json }};
     </script>
@@ -19,6 +21,25 @@
 
 {% block header %}
     <h1>{{ title }}</h1>
+{% endblock %}
+
+{% block body %}
+    <p>First, create a comment with the following message: join</p>
+    <p>Once the bot replies to your comment, you will see a player with your name above</p>
+    <p>Now you can begin to play!  By continuing the comment thread, you can move your player.  Use the following form to generate a comment that you can use (in this case they are very simple)</p>
+
+    <form id="controls">
+        I want to go 
+        <select name="direction">
+            <option value="U">Up</option>
+            <option value="D">Down</option>
+            <option value="L">Left</option>
+            <option value="R">Right</option>
+            <option value="0">Nowhere</option>
+        </select>
+        <input type="submit" value="Generate comment"/>
+    </form>
+    <pre id="comment-output"></pre>
 {% endblock %}
 
 {% block pjs %}

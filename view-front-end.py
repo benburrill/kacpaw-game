@@ -8,7 +8,7 @@ env = jinja2.Environment(loader=jinja2.PackageLoader(__name__), undefined=jinja2
 
 # you may need to update some things here to make it work properly
 html = env.get_template("program.html").render(
-    world_json='{note: "This was loaded from view-front-end.py which may not have access to some important stuff and needs to be modified to keep up with the back end"}',
+    world_json='{"note": "This was loaded from view-front-end.py which may not have access to some important stuff and needs to be modified to keep up with the back end", "players": []}',
     title="Title Goes Here!"
 )
 

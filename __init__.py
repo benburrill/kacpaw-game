@@ -1,15 +1,56 @@
 import json
 import shelve
 import jinja2
-from operator import attrgetter
+from time import sleep
 from collections import defaultdict
+from operator import attrgetter, methodcaller
 
 import kacpaw
 
+
+
+# I really need to rethink basically everything here, but it works
+
+# todo: handle comment threads that are deleted.  Currently, this will raise an error @ user = self.comment.get_author() in Player.updata
+# this is a bad place for this to happen because players objects have no control over anything and can't just remove themselves
+# another problem is that we need to differentiate between 500 server errors (comment removed) and connection problems
+# so please don't delete your comments!
+
 class Player:
-    def __init__(self, user, comment):
-        self.user = user
+    player_speed = 0.05
+    def __init__(self, comment):
         self.comment = comment
+        self.x = 0.5
+        self.y = 0.5
+
+    def get_dict(self): # get the data needed to form user json
+        return {
+            "x": self.x,
+            "y": self.y,
+            "name": self.comment.get_author().name
+        }
+
+    def parse_comment(self, comment):
+        print(comment.get_author().name, "inputed", comment.text_content)
+        try:
+            action, input_text = comment.text_content.lower().strip().split(maxsplit=1)
+        except ValueError:
+            print("invalid input!")
+        else:
+            if action == "move":
+                self.x += {"l": -1, "r": 1}.get(input_text, 0) * self.player_speed
+                self.y += {"u": -1, "d": 1}.get(input_text, 0) * self.player_speed
+
+    def update(self):
+        user = self.comment.get_author()
+        try:
+            self.parse_comment(list(filter(
+                lambda reply: reply.get_author() == user,
+                self.comment.get_replies()
+            )).pop())
+        except IndexError:
+            pass
+
 
 class GameShelf(shelve.DbfilenameShelf):
     WORD_JOIN = "join"
@@ -25,10 +66,11 @@ class GameShelf(shelve.DbfilenameShelf):
         self.setdefault("banned", defaultdict(list))
 
     def wants_to_join(self, comment):
-        return WORD_JOIN in comment.text_content
+        return self.WORD_JOIN in comment.text_content
 
     def comment_is_new(self, comment):
-        return comment not in self["players"].values() and comment not in self["ignored"]
+        return (comment not in map(attrgetter("comment"), self["players"].values()) and 
+            comment not in self["ignored"])
 
     def user_is_playing(self, user):
         return user in self["players"]
@@ -42,7 +84,7 @@ class GameShelf(shelve.DbfilenameShelf):
 
     def ban_player(self, player, reason): # todo: maybe take a comment parameter so we can tell the player that they messed up before we ban them 
         if self.user_is_playing(player):
-            self["ignored"].append(self["players"].pop(player))
+            self["ignored"].append(self["players"].pop(player).comment)
         self["banned"][player].append(reason)
 
     def get_new_players(self, program, session):
@@ -54,8 +96,11 @@ class GameShelf(shelve.DbfilenameShelf):
             # change their comment to the new comment
 
             # todo: move some of this stuff out of this function
-            if self.user_is_playing(author):
-                comment.reply(self.session, "You are already playing!  Go to {.url} to continue playing".format(
+            if not self.comment_is_new(comment):
+                continue
+
+            elif self.user_is_playing(author):
+                comment.reply(session, "You are already playing!  Go to {.url} to continue playing".format(
                     self["players"][author]))
                 self.ignore_comment(comment)
 
@@ -64,9 +109,9 @@ class GameShelf(shelve.DbfilenameShelf):
                     "\n".join(self["banned"][author])))
                 self.ignore_comment(comment)
 
-            elif self.comment_is_new(comment) and self.wants_to_join(comment):
+            elif self.wants_to_join(comment):
                 comment.reply(session, "Welcome to the game, {.name}".format(author))
-                self["players"][author] = comment
+                self["players"][author] = Player(comment)
 
 
 class Game:
@@ -79,17 +124,28 @@ class Game:
 
     def update_program(self, world):
         code = self.env.get_template(self.template_file).render(
-            world_json=json.dumps(dict(self.shelf, **world)),
+            world_json=json.dumps(world),
             title=self.program.get_metadata()["title"]
         )
         self.program.edit(self.session, code=code)
 
-    def update_player(self, player):
-        for player in self.shelf["players"]:
-            pass
+    def run_once(self):
+        self.shelf.get_new_players(self.program, self.session)
+        for user, player in self.shelf["players"].items():
+            player.update()
+
+        self.update_program({
+            "players": list(map(methodcaller("get_dict"), self.shelf["players"].values()))
+        })
+
+    def run_forever(self):
+        while True:
+            self.run_once()
+            sleep(60) # wait a minute before continuing
 
     def __del__(self):
         self.shelf.close()
+
 
 if __name__ == "__main__":
     import os
@@ -98,4 +154,4 @@ if __name__ == "__main__":
     program = kacpaw.Program("5495235907551232")
     print("On the program", program.title)
 
-    Game(session, program, jinja2.PackageLoader(__name__), "game1.shelf", "program.html").update_program({"x": 42})
+    Game(session, program, jinja2.PackageLoader(__name__), "game1.shelf", "program.html").run_forever()

@@ -1,15 +1,22 @@
+register_control_handler(function(data) {
+    $("#comment-output").text("move " + data.direction);
+});
+
+
+textAlign(CENTER, BOTTOM);
+
+var player_radius = 25;
+
 draw = function() {
     background(0);
-    fill(255);
-    text(JSON.stringify(world) + width + ", " + height, 0, 0, width, height);
-    
-    if(mouseIsPressed && keyIsPressed) {
-        fill(255, 0, 0);
-    } else if(mouseIsPressed) {
-        fill(0, 255, 0);
-    } else if(keyIsPressed) {
-        fill(0, 0, 255);
-    }
+    world.players.forEach(function(player) {
+        var x = player.x * width,
+            y = player.y * height;
 
-    ellipse(mouseX, mouseY, 20, 20);
+        fill(255);
+        text(player.name, x, y - player_radius);
+        
+        fill(0, 100, 0);
+        ellipse(x, y, player_radius * 2, player_radius * 2);
+    });
 };
