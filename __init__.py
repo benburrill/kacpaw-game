@@ -31,11 +31,11 @@ class Player:
         }
 
     def parse_comment(self, comment):
-        print(comment.get_author().name, "inputed", comment.text_content)
+        #print(comment.get_author().name, "inputed", comment.text_content)
         try:
             action, input_text = comment.text_content.lower().strip().split(maxsplit=1)
         except ValueError:
-            print("invalid input!")
+            pass
         else:
             if action == "move":
                 self.x += {"l": -1, "r": 1}.get(input_text, 0) * self.player_speed
