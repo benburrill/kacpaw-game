@@ -194,22 +194,23 @@ class Game:
         self.program.edit(self.session, code=code)
 
     def run_once(self):
-        self.shelf.get_new_players(self.program, self.session)
-        for user, player in self.shelf["players"].items():
-            player.update()
+        try:
+            self.shelf.get_new_players(self.program, self.session)
+            for user, player in self.shelf["players"].items():
+                player.update()
 
-        self.update_program({
-            "players": list(map(methodcaller("get_dict"), self.shelf["players"].values()))
-        })
+            self.update_program({
+                "players": list(map(methodcaller("get_dict"), self.shelf["players"].values()))
+            })
+        except:
+            self.shelf.close()
+            raise
 
     def run_forever(self):
         while True:
             self.run_once()
             sleep(60) # wait a minute before continuing
-
-    def __del__(self):
-        self.shelf.close()
-
+            
 
 if __name__ == "__main__":
     import os
