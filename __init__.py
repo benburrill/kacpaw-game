@@ -68,7 +68,7 @@ class Player:
         self.y += {"u": -1, "d": 1}.get(input_text, 0) * self.player_speed
 
         self.x = max(min(self.x, 1), 0)
-        self.y = max(min(self.x, 1), 0)
+        self.y = max(min(self.y, 1), 0)
 
     def action_color(self, input_text):
         safe_print("setting color to", input_text)
@@ -84,7 +84,7 @@ class Player:
         except ValueError:
             pass
         else:
-            if 10 < radius < 30:
+            if 10 <= radius <= 30:
                 self.radius = radius
 
     action_map = { # this is probably not the smartest idea, but it should work
