@@ -55,10 +55,43 @@ class Player:
 
     def get_dict(self): # get the data needed to form user json
         return {
+            "radius": getattr(self, "radius", 25),
+            "color": getattr(self, "color", 0xff006400),
             "x": self.x,
             "y": self.y,
             "name": self.comment.get_author().name
         }
+
+    def action_move(self, input_text):
+        safe_print("moving", input_text)
+        self.x += {"l": -1, "r": 1}.get(input_text, 0) * self.player_speed
+        self.y += {"u": -1, "d": 1}.get(input_text, 0) * self.player_speed
+
+        self.x = max(min(self.x, 1), 0)
+        self.y = max(min(self.x, 1), 0)
+
+    def action_color(self, input_text):
+        safe_print("setting color to", input_text)
+        try:
+            self.color = int(input_text, 0)
+        except ValueError:
+            pass
+
+    def action_radius(self, input_text):
+        safe_print("setting radius to", input_text)
+        try:
+            radius = int(input_text, 0)
+        except ValueError:
+            pass
+        else:
+            if 10 < radius < 30:
+                self.radius = radius
+
+    action_map = { # this is probably not the smartest idea, but it should work
+        "move": action_move,
+        "color": action_color,
+        "radius": action_radius
+    }
 
     def parse_comment(self, comment):
         safe_print(comment.get_author().name, "inputed", comment.text_content)
@@ -67,9 +100,9 @@ class Player:
         except ValueError:
             pass
         else:
-            if action == "move":
-                self.x += {"l": -1, "r": 1}.get(input_text, 0) * self.player_speed
-                self.y += {"u": -1, "d": 1}.get(input_text, 0) * self.player_speed
+            try: self.action_map[action](self, input_text)
+            except KeyError: pass
+
 
     def update(self):
         user = self.comment.get_author()
