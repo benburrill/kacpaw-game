@@ -3,6 +3,7 @@ import json
 import shelve
 import jinja2
 from time import sleep
+from functools import partial
 from collections import defaultdict
 from operator import attrgetter, methodcaller
 
