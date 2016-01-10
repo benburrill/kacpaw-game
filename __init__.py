@@ -1,3 +1,4 @@
+import sys
 import json
 import shelve
 import jinja2
@@ -6,6 +7,34 @@ from collections import defaultdict
 from operator import attrgetter, methodcaller
 
 import kacpaw
+
+
+
+def safe_str(val, encoding=sys.stdout.encoding, errors="xmlcharrefreplace"):
+    """ 
+    Handles encoding problems when converting val to a str in the encoding ``encoding``
+    By default, characters that cannot be expressed with the encoding are replaced with 
+    xml character escapes, but anything from docs.python.org/3/library/codecs.html#error-handlers
+    will work.
+    """
+    return str(val)\
+        .encode(encoding, errors=errors)\
+        .decode(encoding, errors="ignore")
+
+def safe_print(*args, **kwargs):
+    """
+    A print function that uses safe_str before printing.
+    arguments:
+        *args: same as print
+        **kwargs: any optional kwargs from either print or safe_str
+    """
+    # split kwargs into two dictionaries, one with the keys ["encoding", "errors"]
+    # to be passed into safe_str, and one with everything else, to be passed into print
+    enc_kwds = {
+        key: kwargs.pop(key) for key in dict(kwargs) 
+            if key in ["encoding", "errors"]}
+
+    print(*map(partial(safe_str, **enc_kwds), args), **kwargs)
 
 
 
@@ -31,7 +60,7 @@ class Player:
         }
 
     def parse_comment(self, comment):
-        #print(comment.get_author().name, "inputed", comment.text_content)
+        safe_print(comment.get_author().name, "inputed", comment.text_content)
         try:
             action, input_text = comment.text_content.lower().strip().split(maxsplit=1)
         except ValueError:
@@ -96,22 +125,23 @@ class GameShelf(shelve.DbfilenameShelf):
             # change their comment to the new comment
 
             # todo: move some of this stuff out of this function
-            if not self.comment_is_new(comment):
-                continue
+            if self.comment_is_new(comment) and self.wants_to_join(comment):
+                if self.user_is_playing(author):
+                    safe_print(author.name, "tried to join, but is already playing")
+                    comment.reply(session, "You are already playing!  Go to {.url} to continue playing".format(
+                        self["players"][author].comment))
+                    self.ignore_comment(comment)
 
-            elif self.user_is_playing(author):
-                comment.reply(session, "You are already playing!  Go to {.url} to continue playing".format(
-                    self["players"][author]))
-                self.ignore_comment(comment)
+                elif self.user_is_banned(author):
+                    safe_print(author.name, "tried to join, but is banned")
+                    comment.reply(session, "You are not allowed to play!\nReason(s): {}".format(
+                        "\n".join(self["banned"][author])))
+                    self.ignore_comment(comment)
 
-            elif self.user_is_banned(author):
-                comment.reply(session, "You are not allowed to play!\nReason(s): {}".format(
-                    "\n".join(self["banned"][author])))
-                self.ignore_comment(comment)
-
-            elif self.wants_to_join(comment):
-                comment.reply(session, "Welcome to the game, {.name}".format(author))
-                self["players"][author] = Player(comment)
+                else:
+                    safe_print(author.name, "has joined!")
+                    comment.reply(session, "Welcome to the game, {.name}".format(author))
+                    self["players"][author] = Player(comment)
 
 
 class Game:
