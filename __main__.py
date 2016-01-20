@@ -49,15 +49,16 @@ def safe_print(*args, **kwargs):
 
 class Player:
     player_speed = 0.05
-    def __init__(self, comment):
-        self.comment = comment
-        self.x = 0.5
-        self.y = 0.5
+    def __init__(self, x=0.5, y=0.5, color=0xff06400, radius=25):
+        self.x = x
+        self.y = y
+        self.color = color
+        self.radius = radius
 
     def get_dict(self): # get the data needed to form user json
         return {
-            "radius": getattr(self, "radius", 25),
-            "color": getattr(self, "color", 0xff006400),
+            "radius": self.radius,
+            "color": self.color,
             "x": self.x,
             "y": self.y,
             "name": self.comment.get_author().name
@@ -95,23 +96,17 @@ class Player:
     }
 
     def parse_comment(self, comment):
-        safe_print(comment.get_author().name, "inputed", comment.text_content)
         try:
-            action, input_text = comment.text_content.lower().strip().split(maxsplit=1)
+            action, comment = comment.lower().strip().split(maxsplit=1)
         except ValueError:
             pass
         else:
-            try: self.action_map[action](self, input_text)
+            try: self.action_map[action](self, comment)
             except KeyError: pass
 
-
-    def update(self):
-        user = self.comment.get_author()
+    def update(self, comments):
         try:
-            self.parse_comment(list(filter(
-                lambda reply: reply.get_author() == user,
-                self.comment.get_replies()
-            )).pop())
+            self.parse_comment(comments[-1])
         except IndexError:
             pass
 
@@ -187,10 +182,10 @@ class Game:
         self.shelf = GameShelf(save_file, writeback=True)
         self.env = jinja2.Environment(loader=loader, undefined=jinja2.StrictUndefined)
 
-    def update_program(self, world):
+    def update_program(self, world, title):
         code = self.env.get_template(self.template_file).render(
             world_json=json.dumps(world),
-            title=self.program.get_metadata()["title"]
+            title=title
         )
         self.program.edit(self.session, code=code)
 
@@ -202,7 +197,7 @@ class Game:
 
             self.update_program({
                 "players": list(map(methodcaller("get_dict"), self.shelf["players"].values()))
-            })
+            }, self.program.title)
         except:
             self.shelf.close()
             print("At", datetime.datetime.now().ctime(), "the following error occured:")
@@ -218,7 +213,7 @@ if __name__ == "__main__":
     import os
     session = kacpaw.KASession(os.environ["KA_USERNAME"], os.environ["KA_PASSWORD"])
     print("Logged into", session.user.name + "'s", "account")
-    program = kacpaw.Program("5495235907551232")
+    program = kacpaw.Program("5271727055962112")
     print("On the program", program.title)
 
     Game(session, program, jinja2.PackageLoader(__name__), "game1.shelf", "program.html").run_forever()
