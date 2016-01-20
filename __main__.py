@@ -2,6 +2,7 @@ import sys
 import json
 import shelve
 import jinja2
+import datetime
 from time import sleep
 from functools import partial
 from collections import defaultdict
@@ -204,6 +205,7 @@ class Game:
             })
         except:
             self.shelf.close()
+            print("At", datetime.datetime.now().ctime(), "the following error occured:")
             raise
 
     def run_forever(self):
